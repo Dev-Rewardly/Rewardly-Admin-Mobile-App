@@ -1,0 +1,77 @@
+{
+  "auth": {
+    "admin_badge": "Admin",
+    "title": "Inicia sesión en Rewardly Admin",
+    "subtitle": "Usa el correo y la contraseña que te dio tu coalición.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "show_password": "Mostrar contraseña",
+    "hide_password": "Ocultar contraseña",
+    "sign_in": "Iniciar sesión",
+    "signing_in": "Iniciando sesión…",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "no_account_hint": "Las cuentas de administrador las crea tu coalición. Pide acceso al propietario de tu coalición.",
+    "error": {
+      "invalid_credentials": "El correo y la contraseña no coinciden. Revísalos e inténtalo de nuevo.",
+      "not_an_admin": "Esta cuenta no está vinculada a una coalición, así que no puede usar Rewardly Admin.",
+      "network": "No se puede conectar con Rewardly. Revisa tu conexión e inténtalo de nuevo.",
+      "server": "El inicio de sesión no está disponible por ahora. Inténtalo de nuevo en unos minutos.",
+      "session_expired": "Tu sesión terminó. Inicia sesión de nuevo."
+    }
+  },
+  "lock": {
+    "title": "Rewardly Admin está bloqueada",
+    "body": "Desbloquea para continuar.",
+    "unlock": "Desbloquear",
+    "prompt": "Desbloquear Rewardly Admin",
+    "sign_out": "Cerrar sesión"
+  },
+  "tabs": {
+    "dashboard": "Panel",
+    "approvals": "Aprobaciones"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "signed_in_as": "Sesión iniciada como {{who}}",
+    "coming_soon": "Las cifras de tu coalición aparecerán aquí en una versión posterior.",
+    "sign_out": "Cerrar sesión"
+  },
+  "approvals": {
+    "title": "Aprobaciones",
+    "empty": "No hay nada pendiente. La fila está vacía.",
+    "unknown_merchant": "Tienda desconocida",
+    "unknown_member": "Miembro desconocido",
+    "no_amount": "sin monto leído",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "working": "Procesando…",
+    "already_decided": "Alguien más ya lo decidió. La lista se actualizó.",
+    "err_signed_out": "Tu sesión terminó. Inicia sesión de nuevo.",
+    "err_forbidden": "Tu rol no puede aprobar ni rechazar documentos.",
+    "err_offline": "No se puede conectar con Rewardly. La lista puede estar desactualizada.",
+    "err_timeout": "Tardó demasiado. Desliza hacia abajo para reintentar.",
+    "err_generic": "No se pudo cargar la fila de aprobaciones. Es un error de carga, no una fila vacía.",
+    "reject_title": "¿Por qué lo rechazas?",
+    "reject_hint": "El miembro verá este motivo, así que escríbelo para él.",
+    "reject_placeholder": "ej. El total no coincide con el recibo",
+    "reject_required": "Se requiere un motivo para rechazar.",
+    "cancel": "Cancelar",
+    "confirm_reject": "Rechazar",
+    "load_more": "Cargar más",
+    "showing": "Mostrando {{shown}} de {{total}}",
+    "tab_open": "Abiertos",
+    "tab_decided": "Resueltos",
+    "empty_decided": "Aún no hay nada resuelto.",
+    "gate_decides": "Lo decide el motor de puntos — no hay nada que hacer aquí.",
+    "sign_out": "Cerrar sesión",
+    "status_pending": "Pendiente",
+    "status_processing": "Procesando",
+    "status_flagged": "Marcado",
+    "status_under_review": "Requiere revisión",
+    "status_info_requested": "Info solicitada",
+    "status_approved": "Aprobado",
+    "status_rejected": "Rechazado",
+    "status_settled": "Liquidado",
+    "held_note": "Las declaraciones retenidas se resuelven en el portal web; aún no se muestran aquí."
+  }
+}

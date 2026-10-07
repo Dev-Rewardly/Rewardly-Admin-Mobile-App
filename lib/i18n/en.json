@@ -1,0 +1,77 @@
+{
+  "auth": {
+    "admin_badge": "Admin",
+    "title": "Sign in to Rewardly Admin",
+    "subtitle": "Use the email and password your coalition gave you.",
+    "email": "Email",
+    "password": "Password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "sign_in": "Sign in",
+    "signing_in": "Signing in…",
+    "forgot_password": "Forgot password?",
+    "no_account_hint": "Admin accounts are created by your coalition. Ask your coalition owner for access.",
+    "error": {
+      "invalid_credentials": "That email and password don't match. Check them and try again.",
+      "not_an_admin": "This account isn't linked to a coalition, so it can't use Rewardly Admin.",
+      "network": "Can't reach Rewardly. Check your connection and try again.",
+      "server": "Sign-in isn't available right now. Try again in a few minutes.",
+      "session_expired": "Your session ended. Sign in again."
+    }
+  },
+  "lock": {
+    "title": "Rewardly Admin is locked",
+    "body": "Unlock to continue.",
+    "unlock": "Unlock",
+    "prompt": "Unlock Rewardly Admin",
+    "sign_out": "Sign out"
+  },
+  "tabs": {
+    "dashboard": "Dashboard",
+    "approvals": "Approvals"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "signed_in_as": "Signed in as {{who}}",
+    "coming_soon": "Your coalition's numbers will appear here in a later release.",
+    "sign_out": "Sign out"
+  },
+  "approvals": {
+    "title": "Approvals",
+    "empty": "Nothing waiting. The queue is clear.",
+    "unknown_merchant": "Unknown store",
+    "unknown_member": "Unknown member",
+    "no_amount": "no amount read",
+    "approve": "Approve",
+    "reject": "Reject",
+    "working": "Working…",
+    "already_decided": "Someone else already decided that one. The list has been updated.",
+    "err_signed_out": "Your session ended. Sign in again.",
+    "err_forbidden": "Your role can't approve or reject documents.",
+    "err_offline": "Can't reach Rewardly. The list may be out of date.",
+    "err_timeout": "That took too long. Pull down to try again.",
+    "err_generic": "The approvals queue couldn't be loaded. This is a failure to fetch, not an empty queue.",
+    "reject_title": "Why are you rejecting this?",
+    "reject_hint": "The member is told this reason, so write it for them.",
+    "reject_placeholder": "e.g. The total doesn't match the receipt",
+    "reject_required": "A reason is required to reject.",
+    "cancel": "Cancel",
+    "confirm_reject": "Reject",
+    "load_more": "Load more",
+    "showing": "Showing {{shown}} of {{total}}",
+    "tab_open": "Open",
+    "tab_decided": "Decided",
+    "empty_decided": "Nothing decided yet.",
+    "gate_decides": "The earn gate decides — nothing for a person to do here.",
+    "sign_out": "Sign out",
+    "status_pending": "Pending",
+    "status_processing": "Processing",
+    "status_flagged": "Flagged",
+    "status_under_review": "Needs review",
+    "status_info_requested": "Info requested",
+    "status_approved": "Approved",
+    "status_rejected": "Rejected",
+    "status_settled": "Settled",
+    "held_note": "Held declarations are decided in the web portal — they are not shown here yet."
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Rewardly Admin",
+    "slug": "rewardly-admin",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "rewardly-admin",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "live.rewardly.admin",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Used to scan a customer's redemption QR code.",
+        "NSFaceIDUsageDescription": "Unlock Rewardly Admin with Face ID."
+      }
+    },
+    "android": {
+      "package": "live.rewardly.admin",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#1E3A8A"
+      },
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+    },
+    "web": { "output": "static", "favicon": "./assets/images/favicon.png" },
+    "plugins": [
+      "expo-router",
+      ["expo-splash-screen", { "image": "./assets/images/splash-icon.png", "imageWidth": 200, "resizeMode": "contain", "backgroundColor": "#FFFFFF" }],
+      "expo-secure-store",
+      ["expo-local-authentication", { "faceIDPermission": "Unlock Rewardly Admin with Face ID." }],
+      ["expo-camera", { "cameraPermission": "Used to scan a customer's redemption QR code.", "recordAudioAndroid": false }],
+      "expo-localization"
+    ],
+    "experiments": { "typedRoutes": true }
+  }
+}

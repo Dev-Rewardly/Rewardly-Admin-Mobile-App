@@ -1,0 +1,77 @@
+{
+  "auth": {
+    "admin_badge": "管理员",
+    "title": "登录 Rewardly 管理端",
+    "subtitle": "请使用联盟提供给您的邮箱和密码。",
+    "email": "邮箱",
+    "password": "密码",
+    "show_password": "显示密码",
+    "hide_password": "隐藏密码",
+    "sign_in": "登录",
+    "signing_in": "正在登录…",
+    "forgot_password": "忘记密码？",
+    "no_account_hint": "管理员账号由您的联盟创建。请向联盟所有者申请访问权限。",
+    "error": {
+      "invalid_credentials": "邮箱和密码不匹配。请检查后重试。",
+      "not_an_admin": "此账号未关联任何联盟，无法使用 Rewardly 管理端。",
+      "network": "无法连接到 Rewardly。请检查网络后重试。",
+      "server": "目前无法登录。请几分钟后重试。",
+      "session_expired": "您的会话已结束。请重新登录。"
+    }
+  },
+  "lock": {
+    "title": "Rewardly 管理端已锁定",
+    "body": "请解锁以继续。",
+    "unlock": "解锁",
+    "prompt": "解锁 Rewardly 管理端",
+    "sign_out": "退出登录"
+  },
+  "tabs": {
+    "dashboard": "仪表盘",
+    "approvals": "审批"
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "signed_in_as": "当前登录：{{who}}",
+    "coming_soon": "您的联盟数据将在后续版本中显示在此处。",
+    "sign_out": "退出登录"
+  },
+  "approvals": {
+    "title": "审批",
+    "empty": "没有待办事项，队列已清空。",
+    "unknown_merchant": "未知商户",
+    "unknown_member": "未知会员",
+    "no_amount": "未读取到金额",
+    "approve": "通过",
+    "reject": "拒绝",
+    "working": "处理中…",
+    "already_decided": "其他人已处理该项，列表已更新。",
+    "err_signed_out": "登录已失效，请重新登录。",
+    "err_forbidden": "你的角色无权审批文件。",
+    "err_offline": "无法连接 Rewardly，列表可能不是最新的。",
+    "err_timeout": "请求超时，请下拉重试。",
+    "err_generic": "无法加载审批队列。这是加载失败，而不是队列为空。",
+    "reject_title": "为什么拒绝？",
+    "reject_hint": "该理由会显示给会员，请为其撰写。",
+    "reject_placeholder": "例如：总额与小票不符",
+    "reject_required": "拒绝时必须填写理由。",
+    "cancel": "取消",
+    "confirm_reject": "拒绝",
+    "load_more": "加载更多",
+    "showing": "显示 {{shown}} / {{total}}",
+    "tab_open": "待处理",
+    "tab_decided": "已处理",
+    "empty_decided": "暂无已处理记录。",
+    "gate_decides": "由积分引擎判定——此处无需人工处理。",
+    "sign_out": "退出登录",
+    "status_pending": "待处理",
+    "status_processing": "处理中",
+    "status_flagged": "已标记",
+    "status_under_review": "需要审核",
+    "status_info_requested": "待补充信息",
+    "status_approved": "已通过",
+    "status_rejected": "已拒绝",
+    "status_settled": "已结算",
+    "held_note": "暂缓申报在网页端处理，此处尚未显示。"
+  }
+}
