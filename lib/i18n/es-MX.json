@@ -34,7 +34,8 @@
     "title": "Panel",
     "signed_in_as": "Sesión iniciada como {{who}}",
     "coming_soon": "Las cifras de tu coalición aparecerán aquí en una versión posterior.",
-    "sign_out": "Cerrar sesión"
+    "sign_out": "Cerrar sesión",
+    "signed_in_label": "Sesión iniciada como"
   },
   "approvals": {
     "title": "Aprobaciones",
@@ -72,6 +73,11 @@
     "status_approved": "Aprobado",
     "status_rejected": "Rechazado",
     "status_settled": "Liquidado",
-    "held_note": "Las declaraciones retenidas se resuelven en el portal web; aún no se muestran aquí."
+    "held_note": "Las declaraciones retenidas se resuelven en el portal web; aún no se muestran aquí.",
+    "toast_approved": "Aprobado · {{store}}",
+    "toast_rejected": "Rechazado · {{store}}",
+    "pull_to_retry": "Desliza hacia abajo para reintentar.",
+    "account": "Cuenta",
+    "account_open": "Cuenta y cerrar sesión"
   }
 }

@@ -2,21 +2,33 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { color } from '@/constants/design';
+import { color, type } from '@/constants/design';
 import { CoalitionProvider } from '@/context/CoalitionContext';
 
 // Approvals is the first tab with real data behind it; Members and Redeem
-// arrive with their milestones.
-//
-// It is listed BEFORE dashboard deliberately: dashboard is still a placeholder
-// showing no figures, and approvals is the reason an admin opens this app. The
-// first tab is the one that opens.
+// arrive with their milestones. It is listed BEFORE dashboard deliberately:
+// approvals is the reason an admin opens this app. The first tab is the one that opens.
 export default function TabsLayout() {
   const { t } = useTranslation();
   // The coalition is loaded here, once, so both tabs share one request.
   return (
     <CoalitionProvider>
-      <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: color.brand }}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: color.brand,
+          tabBarInactiveTintColor: color.textSecondary,
+          tabBarStyle: {
+            backgroundColor: color.background,
+            borderTopColor: color.border,
+            borderTopWidth: 1,
+            elevation: 0,
+            shadowOpacity: 0,
+          },
+          tabBarLabelStyle: type.tab,
+          tabBarItemStyle: { paddingTop: 4 },
+        }}
+      >
         <Tabs.Screen
           name="approvals"
           options={{
@@ -40,7 +52,7 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 /** Filled when selected, outlined when not, so the current tab reads without colour alone. */
 function tabIcon(on: IconName, off: IconName) {
-  return function TabIcon({ focused, color: tint, size }: { focused: boolean; color: string; size: number }) {
-    return <Ionicons name={focused ? on : off} color={tint} size={size} />;
+  return function TabIcon({ focused, color: tint }: { focused: boolean; color: string; size: number }) {
+    return <Ionicons name={focused ? on : off} color={tint} size={24} />;
   };
 }

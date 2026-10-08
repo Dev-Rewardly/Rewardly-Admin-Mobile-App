@@ -3,14 +3,14 @@
 // made on behalf of one coalition.
 //
 //   Bishop Ranch
-//   [ADMIN] · Americas
+//   [ADMIN] Americas
 //
 // Until the coalition loads (or if it never does) only the Admin marker shows,
 // exactly as before, rather than a placeholder name.
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AdminBadge } from '@/components/AdminBadge';
-import { color, space, type } from '@/constants/design';
+import { color, font, space, type } from '@/constants/design';
 import { useCoalition } from '@/context/CoalitionContext';
 
 export function CoalitionHeader({ align = 'start' }: { align?: 'start' | 'center' }) {
@@ -26,17 +26,17 @@ export function CoalitionHeader({ align = 'start' }: { align?: 'start' | 'center
       )}
       <View style={styles.row}>
         <AdminBadge />
-        {coalition?.name && coalition.region && <Text style={styles.region}>· {coalition.region}</Text>}
+        {coalition?.name && coalition.region && <Text style={styles.region}>{coalition.region}</Text>}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flexShrink: 1, alignItems: 'flex-start', gap: space.xs },
+  wrap: { flexShrink: 1, alignItems: 'flex-start', gap: 5 },
   centred: { alignItems: 'center' },
-  name: { ...type.label, fontSize: 18, fontWeight: '700', color: color.textPrimary },
+  name: { fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: color.textPrimary },
   textCentred: { textAlign: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.xs + 2 },
   region: { ...type.caption, color: color.textSecondary },
 });

@@ -2,41 +2,40 @@
 //
 // The approvals queue, mirroring the web portal's Approvals screen.
 //
+// REDESIGN NOTE: only presentation changed. State, fetching, paging, the
+// decide/409 handling, the reject-reason rule, role gating and the four-state
+// split are the same code as before. New: account sheet (sign out moved behind
+// the avatar), a confirmation toast after a decision, skeleton loading, and a
+// full-screen failed state when a first load fails with nothing to show.
+//
 // WHAT IT MIRRORS, AND WHY EACH CHOICE IS THE PORTAL'S
 //
 //   Two tabs, Open and Decided, because they are different questions and so
 //   they are different queries. Open is FIVE statuses (pending, processing,
 //   flagged, under_review, info_requested) ordered OLDEST first -- the member
-//   who has waited longest. Decided is everything else, NEWEST first, because
-//   it is a record being searched rather than a queue being worked.
+//   who has waited longest. Decided is everything else, NEWEST first.
 //
 //   Only `under_review` is a person's to decide. Every other open row shows
-//   "the earn gate decides" instead of buttons, because offering a decision
-//   the service refuses is worse than offering none.
+//   "the earn gate decides" instead of buttons.
 //
 // FOUR STATES, KEPT APART
 //
-//   loading / loaded-with-rows / loaded-and-empty / failed. The last two are
-//   the ones that get collapsed, and collapsing them is how an outage reads as
-//   "nothing to approve" -- an admin closes the app believing the queue is
-//   clear.
+//   loading / loaded-with-rows / loaded-and-empty / failed. Collapsing the last
+//   two is how an outage reads as "nothing to approve".
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { CoalitionHeader } from '@/components/CoalitionHeader';
+import { ReceiptCard } from '@/components/ReceiptCard';
+import { Avatar, initialsOf } from '@/components/ui/Avatar';
+import { Banner } from '@/components/ui/Banner';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Button } from '@/components/ui/Button';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Toast } from '@/components/ui/Toast';
 import { color, radius, space, type } from '@/constants/design';
 import { useAuth } from '@/context/AuthContext';
 import { useCoalition, useRetryCoalition } from '@/context/CoalitionContext';
@@ -68,7 +67,9 @@ export default function Approvals() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [deciding, setDeciding] = useState<string | null>(null);
+  // Which row, and WHICH decision, is in flight -- so only the button pressed
+  // says "Working…" (a reject must not relabel Approve).
+  const [deciding, setDeciding] = useState<{ id: string; decision: Decision } | null>(null);
 
   // Rejecting needs a reason: verification-api refuses a reject without one
   // (422), and it is the text the MEMBER is shown.
@@ -76,7 +77,23 @@ export default function Approvals() {
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState<string | null>(null);
 
+  // Presentation only.
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const hideToast = useCallback(() => setToast(null), []);
+
   const mayDecide = canDecide(claims?.roles);
+  const who = claims?.name ?? claims?.email ?? '';
+
+  const storeName = useCallback(
+    (r: ReceiptSummary) => r.participant_name ?? r.merchant_name ?? t('approvals.unknown_merchant'),
+    [t],
+  );
+  const amountOf = (r: ReceiptSummary) =>
+    // The receipt's own currency when it names one; otherwise the coalition's.
+    r.amount !== null
+      ? formatAmount(r.amount, r.currency ?? coalition?.currency ?? null, i18n.language)
+      : t('approvals.no_amount');
 
   const fetchPage = useCallback(
     async (which: number, whichTab: QueueTab, mode: 'replace' | 'append') => {
@@ -110,8 +127,6 @@ export default function Approvals() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    // If the coalition header failed to load at sign-in, pulling down is the
-    // admin's way of saying "try again" -- for it as well as the list.
     retryCoalition();
     try {
       await fetchPage(1, tab, 'replace');
@@ -136,7 +151,7 @@ export default function Approvals() {
 
   const submit = useCallback(
     async (receipt: ReceiptSummary, decision: Decision, why?: string) => {
-      setDeciding(receipt.receipt_id);
+      setDeciding({ id: receipt.receipt_id, decision });
       try {
         await decideReceipt(getAccessToken, {
           receiptId: receipt.receipt_id,
@@ -147,10 +162,14 @@ export default function Approvals() {
         setItems((cur) => cur.filter((r) => r.receipt_id !== receipt.receipt_id));
         setTotal((n) => (n === null ? null : Math.max(0, n - 1)));
         setError(null);
+        setToast(
+          t(decision === 'approve' ? 'approvals.toast_approved' : 'approvals.toast_rejected', {
+            store: storeName(receipt),
+          }),
+        );
       } catch (err) {
         if (err instanceof ApiError && err.code === 'CONFLICT') {
-          // Already decided by someone else while this list was open. Not a
-          // failure to report -- it is done.
+          // Already decided by someone else while this list was open.
           setItems((cur) => cur.filter((r) => r.receipt_id !== receipt.receipt_id));
           setTotal((n) => (n === null ? null : Math.max(0, n - 1)));
           setError(t('approvals.already_decided'));
@@ -161,7 +180,7 @@ export default function Approvals() {
         setDeciding(null);
       }
     },
-    [getAccessToken, t],
+    [getAccessToken, storeName, t],
   );
 
   const confirmReject = useCallback(async () => {
@@ -179,238 +198,273 @@ export default function Approvals() {
   }, [rejecting, reason, submit, t]);
 
   const hasMore = total !== null && items.length < total;
+  // A failed first load with nothing to show gets the full-screen failed state;
+  // the banner would only repeat it.
+  const failedEmpty = phase === 'failed' && items.length === 0;
+
+  const listHeader = (
+    <View style={styles.listHeader}>
+      {error !== null && !failedEmpty && <Banner tone="error" message={error} />}
+      {total !== null && items.length > 0 && (
+        <Text style={styles.count}>{t('approvals.showing', { shown: items.length, total })}</Text>
+      )}
+      {/* Held declarations are part of the web Open queue and cannot be decided
+          from a phone. Saying so beats omitting them silently. */}
+      {tab === 'open' && !failedEmpty && <Banner tone="info" message={t('approvals.held_note')} />}
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <CoalitionHeader />
-          <Pressable
-            onPress={() => void signOut()}
-            style={styles.signOut}
-            accessibilityRole="button"
-            accessibilityLabel={t('approvals.sign_out')}
-            hitSlop={8}
-          >
-            <Text style={styles.signOutText}>{t('approvals.sign_out')}</Text>
-          </Pressable>
+          <Avatar
+            initials={initialsOf(who)}
+            onPress={() => setAccountOpen(true)}
+            accessibilityLabel={t('approvals.account_open')}
+          />
         </View>
-
         <Text style={styles.title} accessibilityRole="header">
           {t('approvals.title')}
         </Text>
-
-        <View style={styles.tabs}>
-          {(['open', 'decided'] as const).map((id) => (
-            <Pressable
-              key={id}
-              onPress={() => setTab(id)}
-              style={[styles.tab, tab === id && styles.tabOn]}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: tab === id }}
-              accessibilityLabel={t(`approvals.tab_${id}`)}
-            >
-              <Text style={[styles.tabText, tab === id && styles.tabTextOn]}>
-                {t(`approvals.tab_${id}`)}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {total !== null && items.length > 0 && (
-          <Text style={styles.count}>
-            {t('approvals.showing', { shown: items.length, total })}
-          </Text>
-        )}
+        <SegmentedControl
+          options={[
+            { id: 'open', label: t('approvals.tab_open') },
+            { id: 'decided', label: t('approvals.tab_decided') },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
       </View>
 
-      {error !== null && (
-        <View style={styles.banner} accessibilityLiveRegion="polite">
-          <Text style={styles.bannerText}>{error}</Text>
-        </View>
-      )}
+      <View style={styles.body}>
+        {phase === 'loading' ? (
+          <Skeleton label={t('approvals.working')} />
+        ) : (
+          <FlatList
+            data={items}
+            keyExtractor={(r) => r.receipt_id}
+            contentContainerStyle={items.length === 0 ? styles.emptyWrap : styles.list}
+            ListHeaderComponent={listHeader}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={color.brand} colors={[color.brand]} />
+            }
+            ListEmptyComponent={
+              phase === 'loaded' ? (
+                <EmptyState
+                  icon="checkmark"
+                  tone="success"
+                  message={tab === 'open' ? t('approvals.empty') : t('approvals.empty_decided')}
+                />
+              ) : failedEmpty ? (
+                <EmptyState
+                  icon="alert-circle-outline"
+                  tone="error"
+                  message={error ?? t('approvals.err_generic')}
+                  hint={t('approvals.pull_to_retry')}
+                  live
+                />
+              ) : null
+            }
+            ListFooterComponent={
+              hasMore ? (
+                <Button
+                  label={loadingMore ? t('approvals.working') : t('approvals.load_more')}
+                  accessibilityLabel={t('approvals.load_more')}
+                  variant="secondary"
+                  size="lg"
+                  onPress={() => void loadMore()}
+                  disabled={loadingMore}
+                  style={styles.more}
+                />
+              ) : null
+            }
+            ItemSeparatorComponent={Gap}
+            renderItem={({ item }) => {
+              const held = heldForReview(item.status);
+              const decidable = mayDecide && tab === 'open';
+              return (
+                <ReceiptCard
+                  store={storeName(item)}
+                  member={item.consumer_name ?? t('approvals.unknown_member')}
+                  amount={amountOf(item)}
+                  date={item.submitted_at ? shortDate(item.submitted_at, i18n.language) : ''}
+                  status={item.status}
+                  showActions={decidable && held}
+                  showGate={decidable && !held}
+                  working={deciding?.id === item.receipt_id ? deciding.decision : null}
+                  disabled={deciding !== null}
+                  onApprove={() => void submit(item, 'approve')}
+                  onReject={() => {
+                    setReason('');
+                    setReasonError(null);
+                    setRejecting(item);
+                  }}
+                />
+              );
+            }}
+          />
+        )}
+        <Toast message={toast} onHide={hideToast} />
+      </View>
 
-      {/* Held declarations are part of the web Open queue and cannot be decided
-          from a phone (that route needs a service token as well as the user's).
-          Saying so beats omitting them silently -- an admin would otherwise
-          work a queue they believe is complete. */}
-      {tab === 'open' && phase !== 'loading' && (
-        <Text style={styles.note}>{t('approvals.held_note')}</Text>
-      )}
-
-      {phase === 'loading' ? (
-        <View style={styles.centre}>
-          <ActivityIndicator color={color.brand} />
+      {/* Reject: reason required, written for the member. */}
+      <BottomSheet
+        visible={rejecting !== null}
+        onClose={() => setRejecting(null)}
+        accessibilityLabel={t('approvals.reject_title')}
+      >
+        <View style={styles.sheetHead}>
+          <Text style={styles.sheetTitle} accessibilityRole="header">
+            {t('approvals.reject_title')}
+          </Text>
+          <Text style={styles.sheetHint}>{t('approvals.reject_hint')}</Text>
         </View>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(r) => r.receipt_id}
-          contentContainerStyle={items.length === 0 ? styles.emptyWrap : styles.list}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={color.brand} />
-          }
-          ListEmptyComponent={
-            phase === 'loaded' ? (
-              <Text style={styles.empty}>
-                {tab === 'open' ? t('approvals.empty') : t('approvals.empty_decided')}
+        {rejecting && (
+          <View style={styles.summary}>
+            <View style={styles.summaryText}>
+              <Text style={styles.summaryStore} numberOfLines={1}>
+                {storeName(rejecting)}
               </Text>
-            ) : null
-          }
-          ListFooterComponent={
-            hasMore ? (
-              <Pressable
-                onPress={() => void loadMore()}
-                disabled={loadingMore}
-                style={[styles.more, loadingMore && styles.disabled]}
-                accessibilityRole="button"
-                accessibilityLabel={t('approvals.load_more')}
-              >
-                <Text style={styles.moreText}>
-                  {loadingMore ? t('approvals.working') : t('approvals.load_more')}
-                </Text>
-              </Pressable>
-            ) : null
-          }
-          renderItem={({ item }) => {
-            const held = heldForReview(item.status);
-            return (
-              <View style={styles.card}>
-                <View style={styles.cardTop}>
-                  <Text style={styles.merchant} numberOfLines={1}>
-                    {item.participant_name ?? item.merchant_name ?? t('approvals.unknown_merchant')}
-                  </Text>
-                  <StatusPill status={item.status} />
-                </View>
+              <Text style={styles.summaryMeta} numberOfLines={1}>
+                {rejecting.consumer_name ?? t('approvals.unknown_member')}
+                {rejecting.submitted_at ? ` · ${shortDate(rejecting.submitted_at, i18n.language)}` : ''}
+              </Text>
+            </View>
+            <Text style={styles.summaryAmount}>{amountOf(rejecting)}</Text>
+          </View>
+        )}
+        <View style={styles.fieldWrap}>
+          <TextInput
+            value={reason}
+            onChangeText={(v) => {
+              setReason(v);
+              if (reasonError) setReasonError(null);
+            }}
+            placeholder={t('approvals.reject_placeholder')}
+            placeholderTextColor={color.textTertiary}
+            multiline
+            style={[styles.input, reasonError !== null && styles.inputInvalid]}
+            accessibilityLabel={t('approvals.reject_title')}
+            maxLength={1000}
+            autoFocus
+          />
+          {reasonError !== null && (
+            <View style={styles.inputErrorRow} accessibilityLiveRegion="polite">
+              <Ionicons name="alert-circle-outline" size={14} color={color.error} />
+              <Text style={styles.inputError}>{reasonError}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.sheetActions}>
+          <Button label={t('approvals.cancel')} variant="secondary" size="lg" onPress={() => setRejecting(null)} flex />
+          <Button
+            label={t('approvals.confirm_reject')}
+            variant="destructive"
+            size="lg"
+            onPress={() => void confirmReject()}
+            flex
+          />
+        </View>
+      </BottomSheet>
 
-                <Text style={styles.meta} numberOfLines={1}>
-                  {item.consumer_name ?? t('approvals.unknown_member')}
-                </Text>
-                <Text style={styles.meta}>
-                  {/* The receipt's own currency when it names one; otherwise the
-                      coalition's, which is what the portal shows. */}
-                  {item.amount !== null
-                    ? formatAmount(item.amount, item.currency ?? coalition?.currency ?? null, i18n.language)
-                    : t('approvals.no_amount')}
-                  {item.submitted_at ? ` · ${shortDate(item.submitted_at)}` : ''}
-                </Text>
-
-                {mayDecide &&
-                  tab === 'open' &&
-                  (held ? (
-                    <View style={styles.actions}>
-                      <Pressable
-                        onPress={() => void submit(item, 'approve')}
-                        disabled={deciding !== null}
-                        style={[styles.action, styles.approve, deciding !== null && styles.disabled]}
-                        accessibilityRole="button"
-                        accessibilityLabel={t('approvals.approve')}
-                      >
-                        <Text style={styles.approveText}>
-                          {deciding === item.receipt_id
-                            ? t('approvals.working')
-                            : t('approvals.approve')}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => {
-                          setReason('');
-                          setReasonError(null);
-                          setRejecting(item);
-                        }}
-                        disabled={deciding !== null}
-                        style={[styles.action, styles.reject, deciding !== null && styles.disabled]}
-                        accessibilityRole="button"
-                        accessibilityLabel={t('approvals.reject')}
-                      >
-                        <Text style={styles.rejectText}>{t('approvals.reject')}</Text>
-                      </Pressable>
-                    </View>
-                  ) : (
-                    // Not a person's to decide. Saying why beats a dead button.
-                    <Text style={styles.gate}>{t('approvals.gate_decides')}</Text>
-                  ))}
-              </View>
-            );
+      {/* Account: who is signed in, the coalition, and sign out. */}
+      <BottomSheet
+        visible={accountOpen}
+        onClose={() => setAccountOpen(false)}
+        accessibilityLabel={t('approvals.account')}
+      >
+        <View style={styles.accountRow}>
+          <Avatar initials={initialsOf(who)} size={48} />
+          <View style={styles.summaryText}>
+            {claims?.name ? (
+              <Text style={styles.accountName} numberOfLines={1}>
+                {claims.name}
+              </Text>
+            ) : null}
+            {claims?.email ? (
+              <Text style={styles.summaryMeta} numberOfLines={1}>
+                {claims.email}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        <View style={styles.summary}>
+          <CoalitionHeader />
+        </View>
+        <Button
+          label={t('approvals.sign_out')}
+          variant="destructiveQuiet"
+          size="lg"
+          onPress={() => {
+            setAccountOpen(false);
+            void signOut();
           }}
         />
-      )}
-
-      <Modal
-        visible={rejecting !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setRejecting(null)}
-      >
-        <View style={styles.scrim}>
-          <ScrollView contentContainerStyle={styles.scrimInner} keyboardShouldPersistTaps="handled">
-            <View style={styles.sheet}>
-              <Text style={styles.sheetTitle} accessibilityRole="header">
-                {t('approvals.reject_title')}
-              </Text>
-              <Text style={styles.sheetHint}>{t('approvals.reject_hint')}</Text>
-              <TextInput
-                value={reason}
-                onChangeText={(v) => {
-                  setReason(v);
-                  if (reasonError) setReasonError(null);
-                }}
-                placeholder={t('approvals.reject_placeholder')}
-                placeholderTextColor={color.textTertiary}
-                multiline
-                style={styles.input}
-                accessibilityLabel={t('approvals.reject_title')}
-                maxLength={1000}
-                autoFocus
-              />
-              {reasonError !== null && (
-                <Text style={styles.inputError} accessibilityLiveRegion="polite">
-                  {reasonError}
-                </Text>
-              )}
-              <View style={styles.sheetActions}>
-                <Pressable
-                  onPress={() => setRejecting(null)}
-                  style={[styles.action, styles.cancel]}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('approvals.cancel')}
-                >
-                  <Text style={styles.cancelText}>{t('approvals.cancel')}</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => void confirmReject()}
-                  style={[styles.action, styles.reject]}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('approvals.confirm_reject')}
-                >
-                  <Text style={styles.rejectText}>{t('approvals.confirm_reject')}</Text>
-                </Pressable>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
 
-function StatusPill({ status }: { status: string }) {
-  const { t } = useTranslation();
-  // An unrecognised status is shown as itself rather than hidden or guessed:
-  // one this build has not been taught about is still a fact about the row.
-  const key = `approvals.status_${status}`;
-  const label = t(key);
+function Gap() {
+  return <View style={styles.gap} />;
+}
+
+function Skeleton({ label }: { label: string }) {
   return (
-    <View style={styles.pill}>
-      <Text style={styles.pillText}>{label === key ? status : label}</Text>
+    <View style={styles.list} accessible accessibilityRole="progressbar" accessibilityLabel={label}>
+      {[0, 1, 2].map((i) => (
+        <View key={i} style={[styles.skelCard, i > 0 && styles.gap]}>
+          <View style={styles.skelRow}>
+            <View style={[styles.skelBar, { width: 140 }]} />
+            <View style={[styles.skelBar, { width: 56 }]} />
+          </View>
+          <View style={[styles.skelBar, styles.skelSoft, { width: 180, height: 12 }]} />
+          <View style={styles.skelRow}>
+            <View style={[styles.skelBtn, styles.skelSoft]} />
+            <View style={[styles.skelBtn, styles.skelSoft]} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function EmptyState({
+  icon,
+  tone,
+  message,
+  hint,
+  live,
+}: {
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  tone: 'success' | 'error';
+  message: string;
+  hint?: string;
+  live?: boolean;
+}) {
+  const ok = tone === 'success';
+  return (
+    <View style={styles.empty} accessibilityLiveRegion={live ? 'polite' : 'none'}>
+      <View style={[styles.emptyIcon, { backgroundColor: ok ? color.successSurface : color.errorSurface }]}>
+        <Ionicons name={icon} size={24} color={ok ? color.success : color.error} />
+      </View>
+      <Text style={styles.emptyText}>{message}</Text>
+      {hint ? <Text style={styles.emptyHint}>{hint}</Text> : null}
     </View>
   );
 }
 
 /** Date only. A queue does not need a clock, and a long string wraps on a phone. */
-function shortDate(iso: string): string {
+function shortDate(iso: string, locale?: string): string {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString();
+  if (Number.isNaN(d.getTime())) return '';
+  try {
+    return d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return d.toLocaleDateString();
+  }
 }
 
 function messageFor(err: unknown, t: (k: string) => string): string {
@@ -434,120 +488,68 @@ function messageFor(err: unknown, t: (k: string) => string): string {
   return t('approvals.err_generic');
 }
 
+const H = space.xl - 4; // 20pt screen gutter
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.background },
-  centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { paddingHorizontal: space.lg, paddingTop: space.md, gap: space.sm },
+  header: { paddingHorizontal: H, paddingTop: space.sm - 2, paddingBottom: space.md, gap: 14 },
   headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md },
-  signOut: { minHeight: 44, justifyContent: 'center', paddingHorizontal: space.sm },
-  signOutText: { ...type.label, color: color.brand },
-  title: { ...type.title, color: color.textPrimary },
-  tabs: { flexDirection: 'row', gap: space.sm },
-  tab: {
-    flex: 1,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: color.border,
-  },
-  tabOn: { backgroundColor: color.brand, borderColor: color.brand },
-  tabText: { ...type.label, color: color.textSecondary },
-  tabTextOn: { color: color.onBrand },
-  count: { ...type.caption, color: color.textSecondary },
-  note: {
-    ...type.caption,
-    color: color.textSecondary,
-    paddingHorizontal: space.lg,
-    paddingTop: space.sm,
-  },
-  list: { padding: space.lg, gap: space.md },
-  emptyWrap: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: space.xl },
-  empty: { ...type.body, color: color.textSecondary, textAlign: 'center' },
-  banner: {
-    backgroundColor: color.errorSurface,
-    borderColor: color.error,
-    borderWidth: 1,
-    borderRadius: radius.sm,
-    marginHorizontal: space.lg,
-    marginTop: space.sm,
-    padding: space.md,
-  },
-  bannerText: { ...type.caption, color: color.error },
-  card: {
-    backgroundColor: color.surface,
-    borderColor: color.border,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: space.lg,
-    gap: space.xs,
-  },
-  cardTop: {
+  title: { ...type.largeTitle, color: color.textPrimary },
+  body: { flex: 1, borderTopWidth: 1, borderTopColor: color.divider },
+
+  listHeader: { gap: 10, paddingBottom: space.md },
+  count: { ...type.caption, color: color.textSecondary, fontVariant: ['tabular-nums'] },
+  list: { paddingHorizontal: H, paddingTop: space.md, paddingBottom: space.xxl },
+  emptyWrap: { flexGrow: 1, paddingHorizontal: H, paddingTop: space.md },
+  gap: { height: space.md },
+  more: { marginTop: space.lg },
+
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, padding: space.xxl },
+  emptyIcon: { width: 52, height: 52, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center' },
+  emptyText: { ...type.bodySmall, color: color.textBody, textAlign: 'center' },
+  emptyHint: { ...type.caption, color: color.textSecondary, textAlign: 'center' },
+
+  skelCard: { borderWidth: 1, borderColor: color.skeleton, borderRadius: radius.lg, padding: space.lg, gap: 10 },
+  skelRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+  skelBar: { height: 14, borderRadius: 4, backgroundColor: color.skeleton },
+  skelSoft: { backgroundColor: color.surface },
+  skelBtn: { flex: 1, height: 44, borderRadius: 11, marginTop: 6 },
+
+  sheetHead: { gap: 6 },
+  sheetTitle: { ...type.sheetTitle, color: color.textPrimary },
+  sheetHint: { ...type.label, fontFamily: type.body.fontFamily, color: color.textSecondary },
+  summary: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: space.sm,
-  },
-  merchant: { ...type.label, color: color.textPrimary, flexShrink: 1 },
-  meta: { ...type.caption, color: color.textSecondary },
-  pill: {
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: color.border,
-    backgroundColor: color.background,
-    paddingHorizontal: space.sm,
-    paddingVertical: 2,
-  },
-  pillText: { ...type.caption, color: color.textSecondary },
-  gate: { ...type.caption, color: color.textTertiary, marginTop: space.sm, fontStyle: 'italic' },
-  actions: { flexDirection: 'row', gap: space.md, marginTop: space.md },
-  action: {
-    flex: 1,
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.md,
-    borderWidth: 1,
-  },
-  approve: { backgroundColor: color.brand, borderColor: color.brand },
-  approveText: { ...type.label, color: color.onBrand },
-  reject: { backgroundColor: color.background, borderColor: color.error },
-  rejectText: { ...type.label, color: color.error },
-  cancel: { backgroundColor: color.background, borderColor: color.border },
-  cancelText: { ...type.label, color: color.textSecondary },
-  disabled: { opacity: 0.5 },
-  more: {
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: color.border,
-    marginTop: space.md,
-  },
-  moreText: { ...type.label, color: color.brand },
-  scrim: { flex: 1, backgroundColor: '#0F172A99' },
-  scrimInner: { flexGrow: 1, justifyContent: 'flex-end' },
-  sheet: {
-    backgroundColor: color.background,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    padding: space.xl,
     gap: space.md,
-  },
-  sheetTitle: { ...type.title, color: color.textPrimary },
-  sheetHint: { ...type.caption, color: color.textSecondary },
-  input: {
-    borderColor: color.border,
-    borderWidth: 1,
+    paddingVertical: space.md,
+    paddingHorizontal: 14,
     borderRadius: radius.md,
-    padding: space.md,
-    minHeight: 96,
+    backgroundColor: color.surface,
+  },
+  summaryText: { flex: 1, gap: 2 },
+  summaryStore: { ...type.label, fontFamily: type.headline.fontFamily, color: color.textPrimary },
+  summaryMeta: { ...type.caption, color: color.textSecondary },
+  summaryAmount: { ...type.amount, fontSize: 14, color: color.textPrimary },
+  fieldWrap: { gap: space.sm },
+  input: {
+    minHeight: 104,
+    borderWidth: 1.5,
+    borderColor: color.brand,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    paddingTop: space.md,
+    paddingBottom: space.md,
     textAlignVertical: 'top',
     ...type.body,
     color: color.textPrimary,
   },
+  inputInvalid: { borderColor: color.error },
+  inputErrorRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   inputError: { ...type.caption, color: color.error },
-  sheetActions: { flexDirection: 'row', gap: space.md },
+  sheetActions: { flexDirection: 'row', gap: 10 },
+
+  accountRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  accountName: { ...type.headline, color: color.textPrimary },
 });

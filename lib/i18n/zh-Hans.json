@@ -34,7 +34,8 @@
     "title": "仪表盘",
     "signed_in_as": "当前登录：{{who}}",
     "coming_soon": "您的联盟数据将在后续版本中显示在此处。",
-    "sign_out": "退出登录"
+    "sign_out": "退出登录",
+    "signed_in_label": "当前登录"
   },
   "approvals": {
     "title": "审批",
@@ -72,6 +73,11 @@
     "status_approved": "已通过",
     "status_rejected": "已拒绝",
     "status_settled": "已结算",
-    "held_note": "暂缓申报在网页端处理，此处尚未显示。"
+    "held_note": "暂缓申报在网页端处理，此处尚未显示。",
+    "toast_approved": "已通过 · {{store}}",
+    "toast_rejected": "已拒绝 · {{store}}",
+    "pull_to_retry": "下拉以重试。",
+    "account": "账户",
+    "account_open": "账户与退出登录"
   }
 }

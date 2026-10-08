@@ -2,24 +2,29 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { color, radius, space } from '@/constants/design';
+import { color, radius, type } from '@/constants/design';
 
-export function AdminBadge() {
+// Left-aligned by default; `centred` for a centred column such as the lock
+// screen, where flex-start would pull the badge to the left edge alone.
+export function AdminBadge({ size = 'sm', centred = false }: { size?: 'sm' | 'md'; centred?: boolean }) {
   const { t } = useTranslation();
   return (
-    <View style={styles.badge}>
-      <Text style={styles.text}>{t('auth.admin_badge')}</Text>
+    <View style={[styles.badge, size === 'md' && styles.md, centred && styles.centred]}>
+      <Text style={[styles.text, size === 'md' && styles.textMd]}>{t('auth.admin_badge')}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   badge: {
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
     backgroundColor: color.adminBadge,
-    borderRadius: radius.pill,
-    paddingHorizontal: space.md,
-    paddingVertical: space.xs,
+    borderRadius: radius.xs,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
   },
-  text: { color: color.onAdminBadge, fontSize: 12, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  md: { paddingHorizontal: 8, paddingVertical: 4 },
+  centred: { alignSelf: 'center' },
+  text: { ...type.badge, fontSize: 10, color: color.onAdminBadge },
+  textMd: { fontSize: 10.5 },
 });

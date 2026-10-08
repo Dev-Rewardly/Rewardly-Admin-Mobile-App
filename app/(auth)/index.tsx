@@ -1,10 +1,9 @@
-// Admin login: the Customer login's look (navy button, soft inputs, centred
-// header) with an "Admin" badge, email + password, no social login and no
-// "create account" path: admin accounts are provisioned by the coalition.
+// Admin login. Left-aligned header, outlined inputs with a focus ring, inline
+// error banner. Same behaviour as before: email + password, no social login
+// and no "create account" path -- admin accounts are provisioned by the coalition.
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Linking,
@@ -20,7 +19,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { AdminBadge } from '@/components/AdminBadge';
-import { color, radius, space, type } from '@/constants/design';
+import { Banner } from '@/components/ui/Banner';
+import { Button } from '@/components/ui/Button';
+import { color, hit, radius, space, type } from '@/constants/design';
 import { KEYCLOAK_URLS } from '@/constants/keycloak';
 import { useAuth } from '@/context/AuthContext';
 import { AuthError } from '@/lib/auth/keycloak';
@@ -57,100 +58,92 @@ export default function AdminLogin() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Image source={require('@/assets/images/icon.png')} style={styles.logo} accessibilityIgnoresInvertColors />
-            <AdminBadge />
-            <Text style={styles.title} accessibilityRole="header">
-              {t('auth.title')}
-            </Text>
-            <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>
-          </View>
-
-          <Text style={styles.label}>{t('auth.email')}</Text>
-          <View style={[styles.field, focused === 'email' && styles.fieldFocused]}>
-            <Ionicons
-              name="mail-outline"
-              size={20}
-              color={focused === 'email' ? color.brand : color.textTertiary}
-              style={styles.fieldIcon}
-            />
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              onFocus={() => setFocused('email')}
-              onBlur={() => setFocused(null)}
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect={false}
-              keyboardType="email-address"
-              textContentType="username"
-              returnKeyType="next"
-              onSubmitEditing={() => passwordRef.current?.focus()}
-              submitBehavior="submit"
-              accessibilityLabel={t('auth.email')}
-            />
-          </View>
-
-          <Text style={styles.label}>{t('auth.password')}</Text>
-          {/* The show/hide control sits INSIDE the field, so both fields are the
-              same width and the form reads as one column. */}
-          <View style={[styles.field, focused === 'password' && styles.fieldFocused]}>
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color={focused === 'password' ? color.brand : color.textTertiary}
-              style={styles.fieldIcon}
-            />
-            <TextInput
-              ref={passwordRef}
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              onFocus={() => setFocused('password')}
-              onBlur={() => setFocused(null)}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoComplete="current-password"
-              autoCorrect={false}
-              textContentType="password"
-              returnKeyType="go"
-              onSubmitEditing={submit}
-              accessibilityLabel={t('auth.password')}
-            />
-            <Pressable
-              onPress={() => setShowPassword(v => !v)}
-              style={styles.toggle}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={t(showPassword ? 'auth.hide_password' : 'auth.show_password')}
-            >
-              <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                size={22}
-                color={color.textSecondary}
-              />
-            </Pressable>
-          </View>
-
-          {errorKey && (
-            <View style={styles.error} accessibilityLiveRegion="polite">
-              <Text style={styles.errorText}>{t(errorKey)}</Text>
+            <View style={styles.headerText}>
+              <AdminBadge size="md" />
+              <Text style={styles.title} accessibilityRole="header">
+                {t('auth.title')}
+              </Text>
+              <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>
             </View>
-          )}
+          </View>
 
-          <Pressable
+          <View style={styles.form}>
+            <View style={styles.group}>
+              <Text style={styles.label}>{t('auth.email')}</Text>
+              <View style={[styles.field, focused === 'email' && styles.fieldFocused]}>
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color={focused === 'email' ? color.brand : color.textTertiary}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setFocused('email')}
+                  onBlur={() => setFocused(null)}
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                  textContentType="username"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  submitBehavior="submit"
+                  accessibilityLabel={t('auth.email')}
+                />
+              </View>
+            </View>
+
+            <View style={styles.group}>
+              <Text style={styles.label}>{t('auth.password')}</Text>
+              {/* The show/hide control sits INSIDE the field, so both fields are the
+                  same width and the form reads as one column. */}
+              <View style={[styles.field, styles.fieldWithToggle, focused === 'password' && styles.fieldFocused]}>
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={focused === 'password' ? color.brand : color.textTertiary}
+                />
+                <TextInput
+                  ref={passwordRef}
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  onFocus={() => setFocused('password')}
+                  onBlur={() => setFocused(null)}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoComplete="current-password"
+                  autoCorrect={false}
+                  textContentType="password"
+                  returnKeyType="go"
+                  onSubmitEditing={submit}
+                  accessibilityLabel={t('auth.password')}
+                />
+                <Pressable
+                  onPress={() => setShowPassword((v) => !v)}
+                  style={styles.toggle}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(showPassword ? 'auth.hide_password' : 'auth.show_password')}
+                >
+                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={color.textSecondary} />
+                </Pressable>
+              </View>
+            </View>
+
+            {errorKey && <Banner tone="error" message={t(errorKey)} />}
+          </View>
+
+          <Button
+            label={t('auth.sign_in')}
+            accessibilityLabel={busy ? t('auth.signing_in') : t('auth.sign_in')}
+            size="lg"
             onPress={submit}
-            disabled={!canSubmit}
-            style={[styles.button, !canSubmit && styles.buttonDisabled]}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: !canSubmit, busy }}
-            accessibilityLabel={t('auth.sign_in')}
-          >
-            {busy ? (
-              <ActivityIndicator color={color.onBrand} accessibilityLabel={t('auth.signing_in')} />
-            ) : (
-              <Text style={styles.buttonText}>{t('auth.sign_in')}</Text>
-            )}
-          </Pressable>
+            disabled={!canSubmit && !busy}
+            loading={busy}
+            style={styles.submit}
+          />
 
           <Pressable
             onPress={() => Linking.openURL(KEYCLOAK_URLS.resetPassword).catch(() => {})}
@@ -161,6 +154,7 @@ export default function AdminLogin() {
             <Text style={styles.linkText}>{t('auth.forgot_password')}</Text>
           </Pressable>
 
+          <View style={styles.spacer} />
           <Text style={styles.hint}>{t('auth.no_account_hint')}</Text>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -171,45 +165,52 @@ export default function AdminLogin() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   safe: { flex: 1, backgroundColor: color.background },
-  content: { flexGrow: 1, paddingHorizontal: space.xl, paddingVertical: space.xl, justifyContent: 'center' },
-  header: { alignItems: 'center', gap: space.md, marginBottom: space.xl },
-  logo: { width: 88, height: 88, borderRadius: radius.lg, marginBottom: space.xs },
-  title: { ...type.title, color: color.textPrimary, textAlign: 'center' },
-  subtitle: { ...type.body, color: color.textSecondary, textAlign: 'center', paddingHorizontal: space.md },
-  label: { ...type.label, color: color.textPrimary, marginBottom: space.xs, marginTop: space.lg },
+  content: { flexGrow: 1, paddingHorizontal: space.xl, paddingTop: space.xxxl, paddingBottom: space.xl },
+  header: { gap: space.xl - 4 },
+  logo: { width: 56, height: 56, borderRadius: 14 },
+  headerText: { gap: space.sm },
+  title: { ...type.title, color: color.textPrimary },
+  subtitle: { ...type.bodySmall, color: color.textSecondary },
+  form: { gap: 18, marginTop: 36 },
+  group: { gap: space.sm },
+  label: { ...type.label, color: color.textPrimary },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: color.surface,
-    borderColor: color.border,
+    gap: 10,
+    minHeight: hit.large,
+    paddingHorizontal: 14,
     borderWidth: 1,
+    borderColor: color.borderStrong,
     borderRadius: radius.md,
-    minHeight: 52,
-    paddingHorizontal: space.md,
+    backgroundColor: color.background,
   },
-  fieldFocused: { borderColor: color.brand, backgroundColor: color.background },
-  fieldIcon: { marginRight: space.sm },
-  input: {
-    flex: 1,
-    paddingVertical: space.md,
-    ...type.body,
-    color: color.textPrimary,
-    textAlign: 'auto',
+  fieldWithToggle: { paddingRight: space.xs },
+  // Focus ring: stronger border, plus a soft halo on iOS ONLY.
+  //
+  // On Android, adding shadow props to this View when the input gains focus
+  // rebuilds the native view around the TextInput, which drops focus at once:
+  // tap Email -> focus -> blur -> focus jumps to Password -> blur, and nothing
+  // can be typed (reproduced on the emulator, 2026-10-08). Border-only changes
+  // do not do this.
+  fieldFocused: {
+    borderColor: color.brand,
+    borderWidth: 1.5,
+    ...Platform.select({
+      ios: {
+        shadowColor: color.brand,
+        shadowOpacity: 0.12,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 0 },
+      },
+      default: {},
+    }),
   },
-  toggle: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
-  error: { backgroundColor: color.errorSurface, borderRadius: radius.md, padding: space.md, marginTop: space.lg },
-  errorText: { ...type.caption, color: color.error },
-  button: {
-    backgroundColor: color.brand,
-    borderRadius: radius.md,
-    minHeight: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: space.xl,
-  },
-  buttonDisabled: { opacity: 0.5 },
-  buttonText: { ...type.body, fontWeight: '700', color: color.onBrand },
-  link: { alignSelf: 'center', minHeight: 48, justifyContent: 'center', marginTop: space.sm },
+  input: { flex: 1, paddingVertical: space.md, ...type.body, color: color.textPrimary, textAlign: 'auto' },
+  toggle: { minHeight: hit.min, minWidth: hit.min, alignItems: 'center', justifyContent: 'center' },
+  submit: { marginTop: space.xl + 4 },
+  link: { alignSelf: 'center', minHeight: hit.comfortable, justifyContent: 'center', paddingHorizontal: space.md, marginTop: space.sm },
   linkText: { ...type.label, color: color.brand },
-  hint: { ...type.caption, color: color.textTertiary, textAlign: 'center', marginTop: space.lg },
+  spacer: { flex: 1, minHeight: space.xl },
+  hint: { ...type.caption, color: color.textSecondary, textAlign: 'center', paddingHorizontal: space.lg },
 });

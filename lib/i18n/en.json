@@ -34,7 +34,8 @@
     "title": "Dashboard",
     "signed_in_as": "Signed in as {{who}}",
     "coming_soon": "Your coalition's numbers will appear here in a later release.",
-    "sign_out": "Sign out"
+    "sign_out": "Sign out",
+    "signed_in_label": "Signed in as"
   },
   "approvals": {
     "title": "Approvals",
@@ -72,6 +73,11 @@
     "status_approved": "Approved",
     "status_rejected": "Rejected",
     "status_settled": "Settled",
-    "held_note": "Held declarations are decided in the web portal — they are not shown here yet."
+    "held_note": "Held declarations are decided in the web portal — they are not shown here yet.",
+    "toast_approved": "Approved · {{store}}",
+    "toast_rejected": "Rejected · {{store}}",
+    "pull_to_retry": "Pull down to try again.",
+    "account": "Account",
+    "account_open": "Account and sign out"
   }
 }
