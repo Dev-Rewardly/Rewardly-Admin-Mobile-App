@@ -33,9 +33,89 @@
   "dashboard": {
     "title": "仪表盘",
     "signed_in_as": "当前登录：{{who}}",
-    "coming_soon": "您的联盟数据将在后续版本中显示在此处。",
     "sign_out": "退出登录",
-    "signed_in_label": "当前登录"
+    "signed_in_label": "当前登录",
+    "as_of": "今日 · 截至 {{time}}",
+    "reading": "今日 · 读取中…",
+    "loading": "加载中",
+    "failed": "无法加载。下拉以重试。",
+    "attention": {
+      "title": "需要关注",
+      "all_clear": "一切正常，目前没有需要您处理的事项。",
+      "couldnt_check": "无法检查：{{what}}",
+      "couldnt_check_any": "无法检查需要关注的事项。下拉以重试。",
+      "oldest_today": "最早的是今天",
+      "oldest_days_other": "最早的已 {{count}} 天"
+    },
+    "attention_label": {
+      "settlements_due": "待结算",
+      "settlements_past_due": "逾期结算",
+      "approvals": "待审批",
+      "failed_redemptions": "兑换失败",
+      "coverage": "覆盖率低于健康水平",
+      "flagged": "已标记待审核",
+      "oversight": "监督检查",
+      "claim_errors": "判定申请时出错",
+      "fraud_overrides": "被推翻的严重欺诈标记",
+      "approvals_late": "超过审核期限的凭证",
+      "flagged_approved": "已通过的标记凭证",
+      "duplicates": "重复提交的凭证",
+      "lapsed_codes": "已过期未关闭的兑换码",
+      "disputes": "未解决的争议",
+      "mfa": "未开启两步验证的团队成员",
+      "failed_signins": "登录失败",
+      "api_keys": "14 天内到期的 API 密钥",
+      "participants": "待入驻的参与商户",
+      "promotions": "逾期未启动的促销",
+      "trial": "试用剩余天数"
+    },
+    "today": {
+      "title": "今日",
+      "activity": "活动",
+      "points": "积分",
+      "redemptions": "兑换",
+      "gmv": "GMV",
+      "gmv_note": "消费金额统计正在接入中。",
+      "members": "会员",
+      "active": "活跃",
+      "new": "新增"
+    },
+    "pool": {
+      "title": "奖励资金池",
+      "pool": "资金池",
+      "owed": "应付",
+      "runway": "可支撑时长",
+      "failed": "无法加载奖励资金池。下拉以重试。",
+      "band_healthy": "健康",
+      "band_watch": "关注",
+      "band_restricted": "受限",
+      "band_earn_paused": "暂停发放",
+      "band_backstop": "资金池耗尽"
+    },
+    "runway": {
+      "unknown": "—",
+      "under_a_day": "不足一天",
+      "over_a_year": ">1 年",
+      "days": "约 {{days}} 天",
+      "note_none": "尚未发放任何积分，因此无法计算消耗速度。",
+      "note_unvalued": "已发放积分，但目前无法为其定价：账本未记录成本，且该联盟未设置积分汇率。",
+      "note_missing": "可支撑时长需要资金池余额和消耗速度，其中一项暂不可用。",
+      "note_reading": "正在计算可支撑时长…",
+      "note_today": "按今日的奖励成本计算。暂无每日历史可供平均。",
+      "note_series_other": "按最近 {{count}} 个发放日的平均奖励成本计算。"
+    },
+    "activity": {
+      "title": "最近动态",
+      "empty": "暂无动态。",
+      "earn": "+{{points}} 积分",
+      "redeem": "−{{points}} 积分"
+    },
+    "ago": {
+      "now": "刚刚",
+      "minutes": "{{count}} 分钟前",
+      "hours": "{{count}} 小时前",
+      "days": "{{count}} 天前"
+    }
   },
   "approvals": {
     "title": "审批",

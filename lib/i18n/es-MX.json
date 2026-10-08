@@ -33,9 +33,91 @@
   "dashboard": {
     "title": "Panel",
     "signed_in_as": "Sesión iniciada como {{who}}",
-    "coming_soon": "Las cifras de tu coalición aparecerán aquí en una versión posterior.",
     "sign_out": "Cerrar sesión",
-    "signed_in_label": "Sesión iniciada como"
+    "signed_in_label": "Sesión iniciada como",
+    "as_of": "Hoy · a las {{time}}",
+    "reading": "Hoy · leyendo…",
+    "loading": "Cargando",
+    "failed": "No se pudo cargar. Desliza hacia abajo para reintentar.",
+    "attention": {
+      "title": "Requiere atención",
+      "all_clear": "Todo en orden. Nada requiere tu atención por ahora.",
+      "couldnt_check": "No se pudo revisar: {{what}}",
+      "couldnt_check_any": "No se pudo revisar qué requiere tu atención. Desliza hacia abajo para reintentar.",
+      "oldest_today": "el más antiguo es de hoy",
+      "oldest_days_one": "el más antiguo, {{count}} día",
+      "oldest_days_other": "el más antiguo, {{count}} días"
+    },
+    "attention_label": {
+      "settlements_due": "liquidaciones pendientes",
+      "settlements_past_due": "liquidaciones vencidas",
+      "approvals": "aprobaciones en espera",
+      "failed_redemptions": "canjes fallidos",
+      "coverage": "cobertura por debajo de lo saludable",
+      "flagged": "marcados para revisión",
+      "oversight": "revisiones de supervisión",
+      "claim_errors": "errores al evaluar solicitudes",
+      "fraud_overrides": "alertas críticas de fraude anuladas",
+      "approvals_late": "comprobantes fuera del plazo de revisión",
+      "flagged_approved": "comprobantes marcados que se aprobaron",
+      "duplicates": "comprobantes enviados más de una vez",
+      "lapsed_codes": "códigos de canje vencidos sin cerrar",
+      "disputes": "disputas abiertas",
+      "mfa": "miembros del equipo sin verificación en dos pasos",
+      "failed_signins": "inicios de sesión fallidos",
+      "api_keys": "claves de API que vencen en 14 días",
+      "participants": "participantes pendientes de incorporación",
+      "promotions": "promociones con activación vencida",
+      "trial": "días restantes de tu prueba"
+    },
+    "today": {
+      "title": "Hoy",
+      "activity": "Actividad",
+      "points": "Puntos",
+      "redemptions": "Canjes",
+      "gmv": "GMV",
+      "gmv_note": "Se está conectando el reporte del valor de compra.",
+      "members": "Miembros",
+      "active": "Activos",
+      "new": "Nuevos"
+    },
+    "pool": {
+      "title": "Fondo de recompensas",
+      "pool": "Fondo",
+      "owed": "Adeudado",
+      "runway": "Duración",
+      "failed": "No se pudo cargar tu fondo de recompensas. Desliza hacia abajo para reintentar.",
+      "band_healthy": "Saludable",
+      "band_watch": "En observación",
+      "band_restricted": "Restringido",
+      "band_earn_paused": "Acumulación en pausa",
+      "band_backstop": "Fondo agotado"
+    },
+    "runway": {
+      "unknown": "—",
+      "under_a_day": "menos de un día",
+      "over_a_year": ">1 año",
+      "days": "~{{days}} d",
+      "note_none": "Aún no se han emitido puntos, así que no hay un ritmo de gasto que medir.",
+      "note_unvalued": "Se emitieron puntos, pero aún nada les pone precio: el registro no anotó un costo y esta coalición no tiene una tasa de puntos.",
+      "note_missing": "La duración necesita el saldo del fondo y un ritmo de gasto, y uno de ellos no está disponible.",
+      "note_reading": "Calculando la duración…",
+      "note_today": "Con el costo de recompensas de hoy. Aún no hay historial diario para promediar.",
+      "note_series_one": "Con el costo promedio de recompensas del último {{count}} día con emisión.",
+      "note_series_other": "Con el costo promedio de recompensas de los últimos {{count}} días con emisión."
+    },
+    "activity": {
+      "title": "Actividad reciente",
+      "empty": "Aún no hay actividad.",
+      "earn": "+{{points}} pts",
+      "redeem": "−{{points}} pts"
+    },
+    "ago": {
+      "now": "justo ahora",
+      "minutes": "hace {{count}} min",
+      "hours": "hace {{count}} h",
+      "days": "hace {{count}} d"
+    }
   },
   "approvals": {
     "title": "Aprobaciones",

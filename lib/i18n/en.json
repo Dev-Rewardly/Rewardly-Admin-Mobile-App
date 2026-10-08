@@ -33,9 +33,91 @@
   "dashboard": {
     "title": "Dashboard",
     "signed_in_as": "Signed in as {{who}}",
-    "coming_soon": "Your coalition's numbers will appear here in a later release.",
     "sign_out": "Sign out",
-    "signed_in_label": "Signed in as"
+    "signed_in_label": "Signed in as",
+    "as_of": "Today · as of {{time}}",
+    "reading": "Today · reading…",
+    "loading": "Loading",
+    "failed": "Couldn't load this. Pull down to try again.",
+    "attention": {
+      "title": "Needs attention",
+      "all_clear": "All clear. Nothing needs your attention right now.",
+      "couldnt_check": "Couldn't check: {{what}}",
+      "couldnt_check_any": "Couldn't check what needs your attention. Pull down to try again.",
+      "oldest_today": "oldest today",
+      "oldest_days_one": "oldest {{count}} day",
+      "oldest_days_other": "oldest {{count}} days"
+    },
+    "attention_label": {
+      "settlements_due": "settlements due",
+      "settlements_past_due": "settlements past due",
+      "approvals": "approvals waiting",
+      "failed_redemptions": "failed redemptions",
+      "coverage": "coverage below healthy",
+      "flagged": "flagged for review",
+      "oversight": "oversight checks",
+      "claim_errors": "errors while judging claims",
+      "fraud_overrides": "critical fraud flags overridden",
+      "approvals_late": "proofs past the review deadline",
+      "flagged_approved": "flagged proofs approved",
+      "duplicates": "proofs sent more than once",
+      "lapsed_codes": "redemption codes lapsed but not closed",
+      "disputes": "disputes open",
+      "mfa": "team members without two-step sign-in",
+      "failed_signins": "failed sign-ins",
+      "api_keys": "API keys expiring within 14 days",
+      "participants": "participants awaiting onboarding",
+      "promotions": "promotions overdue to activate",
+      "trial": "days left on your trial"
+    },
+    "today": {
+      "title": "Today",
+      "activity": "Activity",
+      "points": "Points",
+      "redemptions": "Redemptions",
+      "gmv": "GMV",
+      "gmv_note": "Purchase value reporting is being connected.",
+      "members": "Members",
+      "active": "Active",
+      "new": "New"
+    },
+    "pool": {
+      "title": "Reward pool",
+      "pool": "Pool",
+      "owed": "Owed",
+      "runway": "Runway",
+      "failed": "Couldn't load your reward pool. Pull down to try again.",
+      "band_healthy": "Healthy",
+      "band_watch": "Watch",
+      "band_restricted": "Restricted",
+      "band_earn_paused": "Earning paused",
+      "band_backstop": "Pool exhausted"
+    },
+    "runway": {
+      "unknown": "—",
+      "under_a_day": "under a day",
+      "over_a_year": ">1 year",
+      "days": "~{{days}}d",
+      "note_none": "No points have been issued yet, so there is nothing to measure a burn rate against.",
+      "note_unvalued": "Points have been issued, but nothing prices them yet: the ledger recorded no cost and this coalition has no point rate set.",
+      "note_missing": "Runway needs a pool balance and a burn rate, and one of them is unavailable.",
+      "note_reading": "Working out the runway…",
+      "note_today": "At today's reward cost. There is no daily history yet to average.",
+      "note_series_one": "At the average reward cost of the last {{count}} day of issuance.",
+      "note_series_other": "At the average reward cost of the last {{count}} days of issuance."
+    },
+    "activity": {
+      "title": "Recent activity",
+      "empty": "No activity yet.",
+      "earn": "+{{points}} pts",
+      "redeem": "−{{points}} pts"
+    },
+    "ago": {
+      "now": "just now",
+      "minutes": "{{count}}m ago",
+      "hours": "{{count}}h ago",
+      "days": "{{count}}d ago"
+    }
   },
   "approvals": {
     "title": "Approvals",

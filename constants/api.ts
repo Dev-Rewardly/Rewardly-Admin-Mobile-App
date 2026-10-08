@@ -42,6 +42,27 @@ export const API = {
     `${API_HOST}/api/v1/onboarding/coalition-info/${encodeURIComponent(coalitionId)}`,
   /** Authenticated; holds the registered name before a coalition is verified. */
   settingsCoalition: `${API_HOST}/api/v1/settings/coalition`,
+
+  /*
+   * Dashboard. The same upstream routes the portal's dashboard reads through
+   * its own server (traced 2026-10-08). Each answers the admin's own token and
+   * takes the coalition from it; none needs a key the app could not keep.
+   */
+  /** today · earnSeries · recentActivity. period = 7d | 30d | 90d | 1y. */
+  analytics: `${API_HOST}/api/v1/analytics`,
+  newMembers: `${API_HOST}/api/v1/analytics/new-members`,
+  /** Reward pool: pool_balance, liability, points_outstanding. */
+  coverage: `${API_HOST}/api/v1/settings/coverage`,
+  /** base_rate: points per currency unit, for pricing points in the runway. */
+  coalitionConfig: `${API_HOST}/api/v1/coalition/config`,
+  /** source=overview: the oversight counts (fraud, security, disputes…). */
+  auditLogs: `${API_HOST}/api/v1/settings/audit-logs`,
+  receiptStats: `${API_HOST}/api/v1/receipts/stats`,
+  participantSummary: `${API_HOST}/api/v1/participants/summary`,
+  settlements: `${API_HOST}/api/v1/settlements`,
+  redemptions: `${API_HOST}/api/v1/redemptions`,
+  promotions: `${API_HOST}/api/v1/promotions`,
+  billing: `${API_HOST}/api/v1/settings/billing`,
 };
 
 /** A request that has not answered in this long has failed, not "still going". */
