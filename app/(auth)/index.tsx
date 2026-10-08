@@ -1,7 +1,8 @@
 // Admin login: the Customer login's look (navy button, soft inputs, centred
 // header) with an "Admin" badge, email + password, no social login and no
 // "create account" path: admin accounts are provisioned by the coalition.
-import { useState } from 'react';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -32,6 +33,8 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [focused, setFocused] = useState<'email' | 'password' | null>(null);
+  const passwordRef = useRef<TextInput>(null);
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !busy;
 
@@ -62,25 +65,48 @@ export default function AdminLogin() {
           </View>
 
           <Text style={styles.label}>{t('auth.email')}</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect={false}
-            keyboardType="email-address"
-            textContentType="username"
-            returnKeyType="next"
-            accessibilityLabel={t('auth.email')}
-          />
+          <View style={[styles.field, focused === 'email' && styles.fieldFocused]}>
+            <Ionicons
+              name="mail-outline"
+              size={20}
+              color={focused === 'email' ? color.brand : color.textTertiary}
+              style={styles.fieldIcon}
+            />
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              onFocus={() => setFocused('email')}
+              onBlur={() => setFocused(null)}
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect={false}
+              keyboardType="email-address"
+              textContentType="username"
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+              submitBehavior="submit"
+              accessibilityLabel={t('auth.email')}
+            />
+          </View>
 
           <Text style={styles.label}>{t('auth.password')}</Text>
-          <View style={styles.passwordRow}>
+          {/* The show/hide control sits INSIDE the field, so both fields are the
+              same width and the form reads as one column. */}
+          <View style={[styles.field, focused === 'password' && styles.fieldFocused]}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={20}
+              color={focused === 'password' ? color.brand : color.textTertiary}
+              style={styles.fieldIcon}
+            />
             <TextInput
-              style={[styles.input, styles.passwordInput]}
+              ref={passwordRef}
+              style={styles.input}
               value={password}
               onChangeText={setPassword}
+              onFocus={() => setFocused('password')}
+              onBlur={() => setFocused(null)}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoComplete="current-password"
@@ -93,10 +119,15 @@ export default function AdminLogin() {
             <Pressable
               onPress={() => setShowPassword(v => !v)}
               style={styles.toggle}
+              hitSlop={8}
               accessibilityRole="button"
               accessibilityLabel={t(showPassword ? 'auth.hide_password' : 'auth.show_password')}
             >
-              <Text style={styles.toggleText}>{t(showPassword ? 'auth.hide_password' : 'auth.show_password')}</Text>
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={22}
+                color={color.textSecondary}
+              />
             </Pressable>
           </View>
 
@@ -142,26 +173,30 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.background },
   content: { flexGrow: 1, paddingHorizontal: space.xl, paddingVertical: space.xl, justifyContent: 'center' },
   header: { alignItems: 'center', gap: space.md, marginBottom: space.xl },
-  logo: { width: 72, height: 72, borderRadius: radius.lg },
+  logo: { width: 88, height: 88, borderRadius: radius.lg, marginBottom: space.xs },
   title: { ...type.title, color: color.textPrimary, textAlign: 'center' },
-  subtitle: { ...type.body, color: color.textSecondary, textAlign: 'center' },
-  label: { ...type.label, color: color.textPrimary, marginBottom: space.xs, marginTop: space.md },
-  input: {
+  subtitle: { ...type.body, color: color.textSecondary, textAlign: 'center', paddingHorizontal: space.md },
+  label: { ...type.label, color: color.textPrimary, marginBottom: space.xs, marginTop: space.lg },
+  field: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: color.surface,
     borderColor: color.border,
     borderWidth: 1,
     borderRadius: radius.md,
-    paddingHorizontal: space.lg,
+    minHeight: 52,
+    paddingHorizontal: space.md,
+  },
+  fieldFocused: { borderColor: color.brand, backgroundColor: color.background },
+  fieldIcon: { marginRight: space.sm },
+  input: {
+    flex: 1,
     paddingVertical: space.md,
-    minHeight: 48,
     ...type.body,
     color: color.textPrimary,
     textAlign: 'auto',
   },
-  passwordRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  passwordInput: { flex: 1 },
-  toggle: { minHeight: 48, justifyContent: 'center', paddingHorizontal: space.sm },
-  toggleText: { ...type.label, color: color.brand },
+  toggle: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
   error: { backgroundColor: color.errorSurface, borderRadius: radius.md, padding: space.md, marginTop: space.lg },
   errorText: { ...type.caption, color: color.error },
   button: {

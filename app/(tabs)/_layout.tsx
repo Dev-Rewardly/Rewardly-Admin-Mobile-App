@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -13,8 +14,29 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   return (
     <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: color.brand }}>
-      <Tabs.Screen name="approvals" options={{ title: t('tabs.approvals') }} />
-      <Tabs.Screen name="dashboard" options={{ title: t('tabs.dashboard') }} />
+      <Tabs.Screen
+        name="approvals"
+        options={{
+          title: t('tabs.approvals'),
+          tabBarIcon: tabIcon('checkmark-circle', 'checkmark-circle-outline'),
+        }}
+      />
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: t('tabs.dashboard'),
+          tabBarIcon: tabIcon('grid', 'grid-outline'),
+        }}
+      />
     </Tabs>
   );
+}
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+/** Filled when selected, outlined when not, so the current tab reads without colour alone. */
+function tabIcon(on: IconName, off: IconName) {
+  return function TabIcon({ focused, color: tint, size }: { focused: boolean; color: string; size: number }) {
+    return <Ionicons name={focused ? on : off} color={tint} size={size} />;
+  };
 }

@@ -54,7 +54,10 @@ export function heldForReview(status: string | null | undefined): boolean {
 export interface ReceiptSummary {
   receipt_id: string;
   status: ReceiptStatus;
-  merchant_name: string | null;
+  /** The store. verification-api calls a store a participant. */
+  participant_name: string | null;
+  /** Not sent by verification-api as of 2026-10-08; kept as a fallback. */
+  merchant_name?: string | null;
   amount: number | null;
   currency: string | null;
   submitted_at: string | null;
@@ -111,12 +114,14 @@ export async function listReceipts(
   if (tab === 'open') qs.set('statuses', OPEN_STATUSES.join(','));
   else qs.set('exclude_statuses', OPEN_STATUSES.join(','));
 
-  const body = await apiFetch<Partial<ReceiptPage> & { items?: ReceiptSummary[] }>(
-    `${API.receipts}?${qs.toString()}`,
-    { getAccessToken },
-  );
+  const body = await apiFetch<
+    Partial<ReceiptPage> & { receipts?: ReceiptSummary[]; items?: ReceiptSummary[] }
+  >(`${API.receipts}?${qs.toString()}`, { getAccessToken });
 
-  const items = body.items ?? [];
+  // verification-api sends the rows as `receipts` (seen on the live gateway,
+  // 2026-10-08). Reading only `items` dropped every row while keeping `total`,
+  // so the screen said "queue is clear" beside a "Load more" button.
+  const items = body.receipts ?? body.items ?? [];
   return {
     items,
     total: typeof body.total === 'number' ? body.total : null,

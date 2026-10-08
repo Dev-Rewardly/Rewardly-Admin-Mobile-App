@@ -271,7 +271,7 @@ export default function Approvals() {
               <View style={styles.card}>
                 <View style={styles.cardTop}>
                   <Text style={styles.merchant} numberOfLines={1}>
-                    {item.merchant_name ?? t('approvals.unknown_merchant')}
+                    {item.participant_name ?? item.merchant_name ?? t('approvals.unknown_merchant')}
                   </Text>
                   <StatusPill status={item.status} />
                 </View>

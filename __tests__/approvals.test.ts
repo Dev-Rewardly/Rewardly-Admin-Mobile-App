@@ -212,6 +212,17 @@ describe('pagination asks for the page it says it is asking for', () => {
     const page = await listReceipts(token);
     expect(page.total).toBe(50);
   });
+
+  it('reads rows from `receipts`, the key the live service sends', async () => {
+    // Reading only `items` kept the total but dropped every row, so the screen
+    // showed "queue is clear" next to a "Load more" button.
+    mockFetch(() => ({
+      json: async () => ({ success: true, receipts: [{ receipt_id: 'r1' }], total: 5 }),
+    }));
+    const page = await listReceipts(token);
+    expect(page.items.map((r) => r.receipt_id)).toEqual(['r1']);
+    expect(page.total).toBe(5);
+  });
 });
 
 describe('Open and Decided are different queries, as the portal makes them', () => {
