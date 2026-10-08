@@ -114,6 +114,31 @@ Mirrors the web portal's Approvals screen, using the **same platform APIs**.
 These authorise the **caller's own token**, which is why this app can call the
 gateway directly with no server of its own.
 
+The list response carries its rows as **`receipts`** (not `items`), and the
+store as **`participant_name`** (there is no `merchant_name`) — both seen on
+the live gateway, 2026-10-08.
+
+### Coalition header
+
+The top of both tabs shows the coalition this admin works in ("Bishop Ranch ·
+Americas"), as the portal's sidebar does. Amounts use its currency ($17.91).
+
+| Operation | Endpoint |
+|---|---|
+| Coalition | `GET /api/v1/onboarding/coalition-info/{coalition_id}` |
+| Name fallback | `GET /api/v1/settings/coalition` *(only when coalition-info has no name)* |
+
+The same two the portal's `/api/coalition` route reads. `coalition_id` comes
+from the admin's token, never from the app. If the coalition cannot be read,
+the header shows the Admin marker alone and amounts show the bare number — no
+placeholder name, no guessed currency.
+
+> **⚠️ For the backend team:** `coalition-info` answers **with no credential at
+> all** (checked 2026-10-08). Anyone who knows or guesses a coalition id — and
+> they follow a pattern — can read its name, plan, status, region and currency.
+> This app sends the admin's token anyway, so it keeps working if the route is
+> locked down to require one.
+
 ### Two tabs, because they are two questions
 
 | Tab | Statuses | Order |

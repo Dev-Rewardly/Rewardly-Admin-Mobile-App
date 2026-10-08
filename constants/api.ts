@@ -33,6 +33,15 @@ export const API = {
   receipt: (id: string) => `${API_HOST}/api/v1/receipts/${id}`,
   receiptReview: (id: string) => `${API_HOST}/api/v1/receipts/${id}/review`,
   receiptImageUrl: (id: string) => `${API_HOST}/api/v1/receipts/${id}/image-url`,
+  /**
+   * The coalition's name, region and currency -- what the portal's own
+   * /api/coalition reads (2026-10-08). Answers WITHOUT any credential today;
+   * the token is sent anyway so this keeps working if that is locked down.
+   */
+  coalitionInfo: (coalitionId: string) =>
+    `${API_HOST}/api/v1/onboarding/coalition-info/${encodeURIComponent(coalitionId)}`,
+  /** Authenticated; holds the registered name before a coalition is verified. */
+  settingsCoalition: `${API_HOST}/api/v1/settings/coalition`,
 };
 
 /** A request that has not answered in this long has failed, not "still going". */

@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { color } from '@/constants/design';
+import { CoalitionProvider } from '@/context/CoalitionContext';
 
 // Approvals is the first tab with real data behind it; Members and Redeem
 // arrive with their milestones.
@@ -12,23 +13,26 @@ import { color } from '@/constants/design';
 // first tab is the one that opens.
 export default function TabsLayout() {
   const { t } = useTranslation();
+  // The coalition is loaded here, once, so both tabs share one request.
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: color.brand }}>
-      <Tabs.Screen
-        name="approvals"
-        options={{
-          title: t('tabs.approvals'),
-          tabBarIcon: tabIcon('checkmark-circle', 'checkmark-circle-outline'),
-        }}
-      />
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: t('tabs.dashboard'),
-          tabBarIcon: tabIcon('grid', 'grid-outline'),
-        }}
-      />
-    </Tabs>
+    <CoalitionProvider>
+      <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: color.brand }}>
+        <Tabs.Screen
+          name="approvals"
+          options={{
+            title: t('tabs.approvals'),
+            tabBarIcon: tabIcon('checkmark-circle', 'checkmark-circle-outline'),
+          }}
+        />
+        <Tabs.Screen
+          name="dashboard"
+          options={{
+            title: t('tabs.dashboard'),
+            tabBarIcon: tabIcon('grid', 'grid-outline'),
+          }}
+        />
+      </Tabs>
+    </CoalitionProvider>
   );
 }
 

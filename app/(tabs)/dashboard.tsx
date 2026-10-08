@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { AdminBadge } from '@/components/AdminBadge';
+import { CoalitionHeader } from '@/components/CoalitionHeader';
 import { color, radius, space, type } from '@/constants/design';
 import { useAuth } from '@/context/AuthContext';
 
@@ -16,7 +16,7 @@ export default function Dashboard() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
-        <AdminBadge />
+        <CoalitionHeader align="center" />
         <Text style={styles.title} accessibilityRole="header">
           {t('dashboard.title')}
         </Text>

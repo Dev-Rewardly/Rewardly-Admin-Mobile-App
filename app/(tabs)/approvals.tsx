@@ -36,10 +36,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-import { AdminBadge } from '@/components/AdminBadge';
+import { CoalitionHeader } from '@/components/CoalitionHeader';
 import { color, radius, space, type } from '@/constants/design';
 import { useAuth } from '@/context/AuthContext';
+import { useCoalition, useRetryCoalition } from '@/context/CoalitionContext';
 import { ApiError } from '@/lib/api/client';
+import { formatAmount } from '@/lib/api/coalition';
 import {
   canDecide,
   decideReceipt,
@@ -53,8 +55,10 @@ import {
 type Phase = 'loading' | 'loaded' | 'failed';
 
 export default function Approvals() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { claims, getAccessToken, signOut } = useAuth();
+  const coalition = useCoalition();
+  const retryCoalition = useRetryCoalition();
 
   const [tab, setTab] = useState<QueueTab>('open');
   const [phase, setPhase] = useState<Phase>('loading');
@@ -106,6 +110,9 @@ export default function Approvals() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    // If the coalition header failed to load at sign-in, pulling down is the
+    // admin's way of saying "try again" -- for it as well as the list.
+    retryCoalition();
     try {
       await fetchPage(1, tab, 'replace');
     } catch (err) {
@@ -113,7 +120,7 @@ export default function Approvals() {
     } finally {
       setRefreshing(false);
     }
-  }, [fetchPage, tab, t]);
+  }, [fetchPage, retryCoalition, tab, t]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore) return;
@@ -177,7 +184,7 @@ export default function Approvals() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <AdminBadge />
+          <CoalitionHeader />
           <Pressable
             onPress={() => void signOut()}
             style={styles.signOut}
@@ -280,8 +287,10 @@ export default function Approvals() {
                   {item.consumer_name ?? t('approvals.unknown_member')}
                 </Text>
                 <Text style={styles.meta}>
+                  {/* The receipt's own currency when it names one; otherwise the
+                      coalition's, which is what the portal shows. */}
                   {item.amount !== null
-                    ? `${item.currency ?? ''}${item.amount}`
+                    ? formatAmount(item.amount, item.currency ?? coalition?.currency ?? null, i18n.language)
                     : t('approvals.no_amount')}
                   {item.submitted_at ? ` · ${shortDate(item.submitted_at)}` : ''}
                 </Text>
@@ -429,7 +438,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: color.background },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { paddingHorizontal: space.lg, paddingTop: space.md, gap: space.sm },
-  headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.md },
   signOut: { minHeight: 44, justifyContent: 'center', paddingHorizontal: space.sm },
   signOutText: { ...type.label, color: color.brand },
   title: { ...type.title, color: color.textPrimary },
